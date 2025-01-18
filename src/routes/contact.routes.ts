@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { ContactCreate } from "../interfaces/constacts.interface";
+import { Contact, ContactCreate } from "../interfaces/constacts.interface";
 import { ContactUseCase } from "../usecases/contact.usecase";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
@@ -14,7 +14,7 @@ export async function contactsRoutes(fastify: FastifyInstance) {
                 name,
                 email,
                 phone,
-                userEmail: emailUser,               
+                userEmail: emailUser,
             });
             return reply.send(data);
         } catch (error) {
@@ -28,6 +28,33 @@ export async function contactsRoutes(fastify: FastifyInstance) {
             return reply.send(data);
         } catch (error) {
             reply.send(error);
+        }
+    });
+    fastify.put<{ Body: Contact; Params: { id: string } }>(
+        '/:id',
+        async (req, reply) => {
+          const { id } = req.params;
+          const { name, email, phone } = req.body;
+          try {
+            const data = await contactUseCase.updateContact({
+              id,
+              name,
+              email,
+              phone,
+            });
+            return reply.send(data);
+          } catch (error) {
+            reply.send(error);
+          }
+        },
+    );
+    fastify.delete<{ Params: { id: string } }>('/:id', async (req, reply) => {
+        const { id } = req.params;
+        try {
+          const data = await contactUseCase.delete(id);
+          return reply.send(data);
+        } catch (error) {
+          reply.send(error);
         }
     });
 }
